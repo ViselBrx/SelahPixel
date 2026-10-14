@@ -100,20 +100,20 @@ app-oracoes/
 
 Abra o terminal dentro da pasta do projeto:
 
-```powershell
-cd C:\Users\enzot\Desktop\App-Ora-es\app-oracoes
+```bash
+cd app-oracoes
 npm install
 ```
 
 Inicie o servidor de desenvolvimento:
 
-```powershell
+```bash
 npm start
 ```
 
 Escaneie o QR Code com o Expo Go. Também é possível usar os atalhos exibidos pelo Expo ou executar diretamente:
 
-```powershell
+```bash
 # Android ou emulador
 npm run android
 
@@ -123,7 +123,7 @@ npm run web
 
 Se o cache do Expo causar algum comportamento estranho, reinicie-o com:
 
-```powershell
+```bash
 npx expo start --clear
 ```
 
@@ -131,7 +131,7 @@ npx expo start --clear
 
 Antes de gerar uma versão instalável, execute:
 
-```powershell
+```bash
 # Verifica os tipos TypeScript
 npm run typecheck
 
@@ -148,20 +148,20 @@ O perfil `preview` do arquivo `eas.json` está configurado para produzir um **AP
 
 Na primeira utilização, autentique sua conta Expo:
 
-```powershell
+```bash
 npx eas-cli@latest login
 npx eas-cli@latest whoami
 ```
 
 Depois, inicie a compilação:
 
-```powershell
+```bash
 npm run build:apk
 ```
 
 O mesmo processo pode ser executado sem o atalho do npm:
 
-```powershell
+```bash
 npx eas-cli@latest build --platform android --profile preview
 ```
 
@@ -169,7 +169,7 @@ O projeto será enviado ao EAS Build. A primeira compilação pode levar alguns 
 
 Consulte as compilações recentes com:
 
-```powershell
+```bash
 npx eas-cli@latest build:list --platform android
 ```
 
@@ -179,7 +179,7 @@ Quando o processo terminar, o EAS mostrará um link para baixar e instalar o APK
 
 Para publicar na Google Play, use o perfil `production`. Ele gera o pacote **AAB** esperado pela loja:
 
-```powershell
+```bash
 npx eas-cli@latest build --platform android --profile production
 ```
 
