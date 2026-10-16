@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PixelFlame, PixelSparkles } from '@/components/pixel-art';
 import { PixelButton } from '@/components/ui';
@@ -13,6 +14,7 @@ type StreakModalProps = {
 };
 
 export function StreakModal({ visible, onClose }: StreakModalProps) {
+  const insets = useSafeAreaInsets();
   const { activeDates, streak } = useProgress();
   const [scale] = useState(() => new Animated.Value(1));
   const days = getRecentDays();
@@ -32,38 +34,44 @@ export function StreakModal({ visible, onClose }: StreakModalProps) {
   }, [scale, visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.root}>
+    <Modal visible={visible} transparent animationType="fade" presentationStyle="overFullScreen" onRequestClose={onClose}>
+      <View
+        style={[
+          styles.root,
+          { paddingTop: Math.max(insets.top, 18), paddingBottom: Math.max(insets.bottom, 18) },
+        ]}>
         <Pressable accessibilityLabel="Fechar sequência" style={styles.backdrop} onPress={onClose} />
-        <View style={styles.card}>
-          <View pointerEvents="none" style={styles.sparkles}>
-            <PixelSparkles size={76} color={colors.gold} />
-          </View>
-          <Text style={styles.eyebrow}>SUA CHAMA ESTÁ ACESA</Text>
-          <Animated.View style={{ transform: [{ scale }] }}>
-            <PixelFlame size={112} />
-          </Animated.View>
-          <Text style={styles.value}>{streak}</Text>
-          <Text style={styles.title}>{streak === 1 ? 'dia de sequência' : 'dias de sequência'}</Text>
-          <Text style={styles.date}>{formatLocalDate()}</Text>
+        <View accessibilityViewIsModal style={styles.card}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.cardContent}>
+            <View pointerEvents="none" style={styles.sparkles}>
+              <PixelSparkles size={76} color={colors.gold} />
+            </View>
+            <Text style={styles.eyebrow}>SUA CHAMA ESTÁ ACESA</Text>
+            <Animated.View style={{ transform: [{ scale }] }}>
+              <PixelFlame size={112} />
+            </Animated.View>
+            <Text style={styles.value}>{streak}</Text>
+            <Text style={styles.title}>{streak === 1 ? 'dia de sequência' : 'dias de sequência'}</Text>
+            <Text style={styles.date}>{formatLocalDate()}</Text>
 
-          <View style={styles.week}>
-            {days.map((day) => {
-              const active = activeDates.includes(day.key);
-              const isToday = day.key === today;
-              return (
-                <View key={day.key} style={styles.dayColumn}>
-                  <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>{day.label}</Text>
-                  <View style={[styles.dayBox, active && styles.dayBoxActive, isToday && styles.dayBoxToday]}>
-                    <Text style={[styles.dayNumber, active && styles.dayNumberActive]}>{active ? '✓' : day.day}</Text>
+            <View style={styles.week}>
+              {days.map((day) => {
+                const active = activeDates.includes(day.key);
+                const isToday = day.key === today;
+                return (
+                  <View key={day.key} style={styles.dayColumn}>
+                    <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>{day.label}</Text>
+                    <View style={[styles.dayBox, active && styles.dayBoxActive, isToday && styles.dayBoxToday]}>
+                      <Text style={[styles.dayNumber, active && styles.dayNumberActive]}>{active ? '✓' : day.day}</Text>
+                    </View>
                   </View>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
 
-          <Text style={styles.hint}>Abra o Orá todos os dias para manter sua chama viva.</Text>
-          <PixelButton label="Continuar jornada" onPress={onClose} style={styles.button} />
+            <Text style={styles.hint}>Abra o SelahPixel todos os dias para manter sua chama viva.</Text>
+            <PixelButton label="Continuar jornada" onPress={onClose} style={styles.button} />
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -88,16 +96,19 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 470,
-    alignItems: 'center',
+    maxHeight: '100%',
     overflow: 'hidden',
     backgroundColor: colors.panel,
     borderWidth: 3,
     borderColor: colors.gold,
     borderBottomWidth: 8,
     borderBottomColor: colors.goldDark,
+    ...pixelShadow,
+  },
+  cardContent: {
+    alignItems: 'center',
     padding: 24,
     gap: 7,
-    ...pixelShadow,
   },
   sparkles: {
     position: 'absolute',

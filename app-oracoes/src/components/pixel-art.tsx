@@ -2,6 +2,26 @@ import Svg, { G, Path, Rect, SvgProps } from 'react-native-svg';
 
 type ArtProps = SvgProps & { size?: number };
 
+export function PixelBrandMark({ size = 64, ...props }: ArtProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64" {...props}>
+      <Rect x="5" y="18" width="24" height="32" fill="#8E622A" />
+      <Rect x="35" y="18" width="24" height="32" fill="#8E622A" />
+      <Rect x="9" y="14" width="20" height="32" fill="#FFF1C8" />
+      <Rect x="35" y="14" width="20" height="32" fill="#FFF1C8" />
+      <Rect x="13" y="18" width="16" height="24" fill="#F2E5C5" />
+      <Rect x="35" y="18" width="16" height="24" fill="#F2E5C5" />
+      <Rect x="29" y="14" width="6" height="38" fill="#6E3032" />
+      <Rect x="21" y="23" width="5" height="15" fill="#E7B85C" />
+      <Rect x="38" y="23" width="5" height="15" fill="#E7B85C" />
+      <Rect x="9" y="46" width="20" height="5" fill="#D7C49D" />
+      <Rect x="35" y="46" width="20" height="5" fill="#D7C49D" />
+      <Rect x="27" y="6" width="10" height="5" fill="#FFD77A" />
+      <Rect x="29" y="4" width="6" height="9" fill="#FFD77A" />
+    </Svg>
+  );
+}
+
 export function PixelBible({ size = 112, ...props }: ArtProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 96 96" {...props}>
@@ -38,6 +58,34 @@ export function PixelCandle({ size = 72, ...props }: ArtProps) {
       <Rect x="14" y="55" width="36" height="6" fill="#8E622A" />
       <Rect x="22" y="17" width="4" height="4" fill="#E7B85C" />
       <Rect x="40" y="13" width="4" height="4" fill="#FFD77A" />
+    </Svg>
+  );
+}
+
+export function PixelPrayer({ size = 72, color, ...props }: ArtProps & { color?: string }) {
+  const sleeve = color ?? '#6E5AA6';
+  const sleeveLight = color ?? '#8C79A8';
+  const skin = color ?? '#E7B85C';
+  const skinLight = color ?? '#FFD77A';
+  const shadow = color ?? '#8E622A';
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 64 64" {...props}>
+      <Rect x="4" y="46" width="20" height="12" fill={sleeve} />
+      <Rect x="40" y="46" width="20" height="12" fill={sleeve} />
+      <Rect x="10" y="40" width="16" height="12" fill={sleeveLight} />
+      <Rect x="38" y="40" width="16" height="12" fill={sleeveLight} />
+      <Rect x="18" y="32" width="10" height="16" fill={skin} />
+      <Rect x="36" y="32" width="10" height="16" fill={skin} />
+      <Rect x="22" y="22" width="9" height="20" fill={skinLight} />
+      <Rect x="33" y="22" width="9" height="20" fill={skinLight} />
+      <Rect x="27" y="10" width="10" height="30" fill={skinLight} />
+      <Rect x="27" y="36" width="10" height="14" fill={skin} />
+      <Rect x="22" y="28" width="5" height="10" fill={shadow} />
+      <Rect x="37" y="28" width="5" height="10" fill={shadow} />
+      <Rect x="29" y="6" width="6" height="6" fill={color ?? '#FFF1B8'} />
+      <Rect x="10" y="58" width="16" height="4" fill={color ?? '#55466D'} />
+      <Rect x="38" y="58" width="16" height="4" fill={color ?? '#55466D'} />
     </Svg>
   );
 }
@@ -101,7 +149,7 @@ export function PixelBookmark({ size = 26, color = '#E7B85C', filled = false, ..
   );
 }
 
-export type NavIconName = 'home' | 'bible' | 'prayer' | 'saved' | 'search' | 'spark';
+export type NavIconName = 'home' | 'bible' | 'prayer' | 'saved' | 'credits' | 'search' | 'spark';
 
 export function PixelNavIcon({
   name,
@@ -133,19 +181,23 @@ export function PixelNavIcon({
   }
 
   if (name === 'prayer') {
-    return (
-      <Svg width={size} height={size} viewBox="0 0 24 24" {...props}>
-        <Rect x="10" y="2" width="4" height="6" fill={color} />
-        <Rect x="7" y="6" width="10" height="4" fill={color} />
-        <Rect x="5" y="9" width="14" height="4" fill={color} />
-        <Rect x="7" y="13" width="10" height="5" fill={muted} stroke={color} strokeWidth="2" />
-        <Rect x="9" y="18" width="6" height="4" fill={color} />
-      </Svg>
-    );
+    return <PixelPrayer size={size} color={String(color)} {...props} />;
   }
 
   if (name === 'saved') {
     return <PixelBookmark size={size} color={color} filled={filled} {...props} />;
+  }
+
+  if (name === 'credits') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" {...props}>
+        <Rect x="8" y="2" width="8" height="7" fill={color} />
+        <Rect x="5" y="9" width="14" height="3" fill={color} />
+        <Rect x="3" y="12" width="18" height="9" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
+        <Rect x="10" y="13" width="4" height="9" fill={filled ? '#10131D' : color} />
+        <Rect x="7" y="16" width="10" height="3" fill={filled ? '#10131D' : color} />
+      </Svg>
+    );
   }
 
   if (name === 'search') {

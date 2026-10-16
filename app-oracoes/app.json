@@ -1,14 +1,21 @@
 {
   "expo": {
-    "name": "Orá: Jornada Bíblica",
+    "name": "SelahPixel",
     "slug": "ora-jornada-biblica",
+    "description": "SelahPixel — Guarde a Palavra. Encontre sua paz.",
     "version": "1.0.0",
     "orientation": "portrait",
+    "backgroundColor": "#10131D",
+    "primaryColor": "#E7B85C",
     "icon": "./assets/images/icon.png",
-    "scheme": "ora",
+    "scheme": "selahpixel",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.viselbrx.selahpixel",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.orajornada.biblica",
@@ -31,7 +38,7 @@
         {
           "backgroundColor": "#10131D",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 72,
+          "imageWidth": 160,
           "dark": {
             "backgroundColor": "#10131D",
             "image": "./assets/images/splash-icon.png"

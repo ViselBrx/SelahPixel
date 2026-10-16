@@ -1,14 +1,18 @@
 import { Tabs } from 'expo-router';
-import { ColorValue, Platform, StyleSheet } from 'react-native';
+import { ColorValue, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NavIconName, PixelNavIcon } from '@/components/pixel-art';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, layout } from '@/theme';
 
 function TabIcon({ name, color, focused }: { name: NavIconName; color: ColorValue; focused: boolean }) {
   return <PixelNavIcon name={name} color={color} filled={focused} size={24} />;
 }
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, layout.tabBarMinBottom);
+
   return (
     <Tabs
       screenOptions={{
@@ -19,7 +23,13 @@ export default function TabsLayout() {
         tabBarHideOnKeyboard: true,
         tabBarLabelStyle: styles.tabLabel,
         tabBarItemStyle: styles.tabItem,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: layout.tabBarContentHeight + bottomPadding,
+            paddingBottom: bottomPadding,
+          },
+        ],
       }}>
       <Tabs.Screen
         name="index"
@@ -49,6 +59,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => <TabIcon name="saved" color={color} focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="creditos"
+        options={{
+          title: 'Créditos',
+          tabBarIcon: ({ color, focused }) => <TabIcon name="credits" color={color} focused={focused} />,
+        }}
+      />
     </Tabs>
   );
 }
@@ -62,9 +79,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: Platform.OS === 'ios' ? 84 : 70,
     paddingTop: 8,
-    paddingBottom: Platform.OS === 'ios' ? 18 : 6,
     backgroundColor: colors.panel,
     borderLeftWidth: 0,
     borderRightWidth: 0,
@@ -82,8 +97,8 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontFamily: fonts.pixel,
-    fontSize: 10,
-    letterSpacing: 0.2,
+    fontSize: 9,
+    letterSpacing: 0,
     textTransform: 'uppercase',
   },
 });

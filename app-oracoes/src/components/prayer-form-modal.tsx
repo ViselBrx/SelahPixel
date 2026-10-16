@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PixelCandle, PixelHeart, PixelScroll, PixelShield } from '@/components/pixel-art';
+import { PixelCandle, PixelHeart, PixelPrayer, PixelScroll, PixelShield } from '@/components/pixel-art';
 import { PixelButton } from '@/components/ui';
 import { markColors, useProgress } from '@/context/progress-context';
 import { Prayer } from '@/data/content';
@@ -11,6 +11,12 @@ import { DayPeriod, periodLabels } from '@/utils/date';
 
 type PrayerFormModalProps = { visible: boolean; prayer?: Prayer | null; onClose: () => void };
 type PrayerIcon = Prayer['icon'];
+const prayerIconLabels: Record<PrayerIcon, string> = {
+  candle: 'Vela',
+  shield: 'Escudo',
+  heart: 'Coração',
+  scroll: 'Palavra',
+};
 
 export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalProps) {
   const insets = useSafeAreaInsets();
@@ -25,12 +31,15 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
   const [color, setColor] = useState(() => prayer?.color ?? markColors[0]);
   const [icon, setIcon] = useState<PrayerIcon>(() => prayer?.icon ?? 'candle');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSave = () => {
+    if (submitting) return;
     if (!title.trim() || !text.trim()) {
       setError('Informe o título e o texto da oração.');
       return;
     }
+    setSubmitting(true);
     const draft = {
       title: title.trim(),
       subtitle: subtitle.trim() || 'Oração pessoal',
@@ -48,18 +57,23 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <Modal visible={visible} transparent animationType="slide" presentationStyle="overFullScreen" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={[
+          styles.root,
+          { paddingTop: Math.max(insets.top, 10), paddingBottom: Math.max(insets.bottom, 10) },
+        ]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Pressable accessibilityLabel="Fechar formulário" style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View accessibilityViewIsModal style={styles.sheet}>
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
             <View style={styles.header}>
-              <PixelCandle size={54} />
+              <PixelPrayer size={54} />
               <View style={styles.headerCopy}>
                 <Text style={styles.eyebrow}>{prayer ? 'ATUALIZAR ORAÇÃO' : 'NOVA ORAÇÃO'}</Text>
                 <Text style={styles.title}>{prayer ? 'Editar oração' : 'Adicionar oração'}</Text>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} style={styles.close}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Fechar formulário de oração" hitSlop={8} onPress={onClose} style={styles.close}>
                 <Text style={styles.closeText}>×</Text>
               </Pressable>
             </View>
@@ -86,8 +100,15 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
               <Text style={styles.label}>ÍCONE</Text>
               <View style={styles.iconRow}>
                 {(['candle', 'shield', 'heart', 'scroll'] as const).map((item) => (
-                  <Pressable key={item} onPress={() => setIcon(item)} style={[styles.iconOption, icon === item && styles.iconOptionActive]}>
+                  <Pressable
+                    key={item}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`Ícone ${prayerIconLabels[item]}`}
+                    accessibilityState={{ checked: icon === item }}
+                    onPress={() => setIcon(item)}
+                    style={[styles.iconOption, icon === item && styles.iconOptionActive]}>
                     <PrayerIconArt icon={item} />
+                    <Text style={[styles.iconLabel, icon === item && styles.iconLabelActive]}>{prayerIconLabels[item]}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -96,8 +117,14 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
             <View style={styles.group}>
               <Text style={styles.label}>COR</Text>
               <View style={styles.colorRow}>
-                {markColors.map((item) => (
-                  <Pressable key={item} onPress={() => setColor(item)} style={[styles.colorOption, { backgroundColor: item }, color === item && styles.colorOptionActive]}>
+                {markColors.map((item, index) => (
+                  <Pressable
+                    key={item}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`Cor ${['dourada', 'verde', 'azul', 'vermelha', 'violeta'][index]}`}
+                    accessibilityState={{ checked: color === item }}
+                    onPress={() => setColor(item)}
+                    style={[styles.colorOption, { backgroundColor: item }, color === item && styles.colorOptionActive]}>
                     {color === item ? <Text style={styles.check}>✓</Text> : null}
                   </Pressable>
                 ))}
@@ -105,7 +132,11 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
             </View>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <PixelButton label={prayer ? 'Salvar alterações' : 'Adicionar oração'} onPress={handleSave} />
+            <PixelButton
+              label={submitting ? 'Salvando...' : prayer ? 'Salvar alterações' : 'Adicionar oração'}
+              disabled={submitting}
+              onPress={handleSave}
+            />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -121,18 +152,18 @@ function PrayerIconArt({ icon }: { icon: PrayerIcon }) {
 }
 
 function Field({ label, multiline, ...props }: { label: string; multiline?: boolean; value: string; onChangeText: (value: string) => void; placeholder: string }) {
-  return <View style={styles.group}><Text style={styles.label}>{label}</Text><TextInput {...props} multiline={multiline} placeholderTextColor="#8D806A" textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textArea]} /></View>;
+  return <View style={styles.group}><Text style={styles.label}>{label}</Text><TextInput {...props} accessibilityLabel={label.replace(' *', '')} multiline={multiline} placeholderTextColor="#8D806A" textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textArea]} /></View>;
 }
 
 function Option({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return <Pressable onPress={onPress} style={[styles.option, active && styles.optionActive]}><Text style={[styles.optionText, active && styles.optionTextActive]}>{label}</Text></Pressable>;
+  return <Pressable accessibilityRole="radio" accessibilityLabel={label} accessibilityState={{ checked: active }} onPress={onPress} style={[styles.option, active && styles.optionActive]}><Text style={[styles.optionText, active && styles.optionTextActive]}>{label}</Text></Pressable>;
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end' },
+  root: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: 10 },
   backdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(4,5,9,0.82)' },
-  sheet: { width: '100%', maxHeight: '94%', alignSelf: 'center', maxWidth: 620, backgroundColor: colors.parchment, borderWidth: 3, borderColor: colors.parchmentLight, borderBottomColor: colors.goldDark, ...pixelShadow },
-  content: { padding: 20, gap: 17 },
+  sheet: { width: '100%', maxHeight: '100%', alignSelf: 'center', maxWidth: 620, backgroundColor: colors.parchment, borderWidth: 3, borderColor: colors.parchmentLight, borderBottomColor: colors.goldDark, ...pixelShadow },
+  content: { padding: 20, paddingBottom: 24, gap: 17 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerCopy: { flex: 1 },
   eyebrow: { color: colors.goldDark, fontFamily: fonts.pixel, fontSize: 9, letterSpacing: 0.8 },
@@ -151,8 +182,10 @@ const styles = StyleSheet.create({
   optionText: { color: '#675A46', fontFamily: fonts.pixel, fontSize: 9 },
   optionTextActive: { color: colors.night },
   iconRow: { flexDirection: 'row', gap: 9 },
-  iconOption: { flex: 1, height: 54, alignItems: 'center', justifyContent: 'center', backgroundColor: '#E1D2B0', borderWidth: 2, borderColor: '#B9A47B' },
+  iconOption: { flex: 1, minHeight: 68, alignItems: 'center', justifyContent: 'center', gap: 2, backgroundColor: '#E1D2B0', borderWidth: 2, borderColor: '#B9A47B' },
   iconOptionActive: { backgroundColor: colors.gold, borderColor: colors.goldDark },
+  iconLabel: { color: '#675A46', fontFamily: fonts.pixel, fontSize: 8 },
+  iconLabelActive: { color: colors.night },
   colorRow: { flexDirection: 'row', gap: 11 },
   colorOption: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.ink },
   colorOptionActive: { transform: [{ translateY: -3 }], borderWidth: 3 },

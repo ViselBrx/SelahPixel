@@ -4,6 +4,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -29,15 +30,18 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
   const [selectedColor, setSelectedColor] = useState<string>(() => currentMark?.color ?? markColors[0]);
   const [note, setNote] = useState(() => currentMark?.note ?? '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSave = () => {
-    if (!verse) return;
+    if (!verse || submitting) return;
+    setSubmitting(true);
     setMark(verse.id, selectedColor, note);
     onClose();
   };
 
   const handleRemove = () => {
-    if (!verse) return;
+    if (!verse || submitting) return;
+    setSubmitting(true);
     removeMark(verse.id);
     onClose();
   };
@@ -47,13 +51,21 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
       visible={Boolean(verse)}
       transparent
       animationType="slide"
+      presentationStyle="overFullScreen"
       onRequestClose={() => (confirmingDelete ? setConfirmingDelete(false) : onClose())}>
       <View style={styles.modalRoot}>
         <Pressable accessibilityLabel="Fechar" style={styles.backdrop} onPress={onClose} />
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={[styles.keyboardWrap, { paddingBottom: Math.max(insets.bottom, 14) }]}>
-          <View style={styles.sheet}>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={[
+            styles.keyboardWrap,
+            { paddingTop: Math.max(insets.top, 12), paddingBottom: Math.max(insets.bottom, 14) },
+          ]}>
+          <View accessibilityViewIsModal style={styles.sheet}>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.sheetContent}>
             <View style={styles.handle} />
             <View style={styles.headingRow}>
               <View style={[styles.iconTile, { borderColor: selectedColor }]}>
@@ -63,7 +75,7 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
                 <Text style={styles.eyebrow}>{currentMark ? 'ATUALIZAR MARCAÇÃO' : 'CADASTRAR MARCAÇÃO'}</Text>
                 <Text style={styles.title}>{verse?.reference}</Text>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} style={styles.closeButton}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Fechar marcação" hitSlop={8} onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeText}>×</Text>
               </Pressable>
             </View>
@@ -75,12 +87,12 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>COR DO MARCADOR</Text>
               <View style={styles.colorsRow}>
-                {markColors.map((color) => (
+                {markColors.map((color, index) => (
                   <Pressable
                     key={color}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: selectedColor === color }}
-                    accessibilityLabel={`Selecionar cor ${color}`}
+                    accessibilityLabel={`Selecionar marcador ${['dourado', 'verde', 'azul', 'vermelho', 'violeta'][index]}`}
                     onPress={() => setSelectedColor(color)}
                     style={[
                       styles.colorButton,
@@ -96,6 +108,7 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>ANOTAÇÃO PESSOAL</Text>
               <TextInput
+                accessibilityLabel="Anotação pessoal"
                 multiline
                 maxLength={240}
                 value={note}
@@ -114,10 +127,12 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
               ) : null}
               <PixelButton
                 label={currentMark ? 'Atualizar marcação' : 'Cadastrar marcação'}
+                disabled={submitting}
                 onPress={handleSave}
                 style={styles.saveButton}
               />
             </View>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
         {confirmingDelete ? (
@@ -132,7 +147,7 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
               <Text style={styles.confirmWarning}>Esta ação não pode ser desfeita.</Text>
               <View style={styles.confirmActions}>
                 <PixelButton label="Cancelar" tone="dark" compact onPress={() => setConfirmingDelete(false)} style={styles.confirmAction} />
-                <PixelButton label="Sim, excluir" tone="ruby" compact onPress={handleRemove} style={styles.confirmAction} />
+                <PixelButton label={submitting ? 'Excluindo...' : 'Sim, excluir'} tone="ruby" compact disabled={submitting} onPress={handleRemove} style={styles.confirmAction} />
               </View>
             </View>
           </View>
@@ -163,13 +178,16 @@ const styles = StyleSheet.create({
   sheet: {
     width: '100%',
     maxWidth: 620,
+    maxHeight: '100%',
     backgroundColor: colors.parchment,
     borderWidth: 3,
     borderColor: colors.parchmentLight,
     borderBottomColor: colors.goldDark,
+    ...pixelShadow,
+  },
+  sheetContent: {
     padding: 20,
     gap: 18,
-    ...pixelShadow,
   },
   handle: {
     width: 44,
@@ -241,6 +259,7 @@ const styles = StyleSheet.create({
   },
   colorsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   colorButton: {

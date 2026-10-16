@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PixelCandle, PixelHeart, PixelScroll, PixelShield } from '@/components/pixel-art';
+import { PixelCandle, PixelHeart, PixelPrayer, PixelScroll, PixelShield } from '@/components/pixel-art';
 import { PixelBadge, PixelButton } from '@/components/ui';
 import { useProgress } from '@/context/progress-context';
 import { Prayer } from '@/data/content';
@@ -23,21 +24,23 @@ export function PrayerModal({ prayer, onClose }: PrayerModalProps) {
   const insets = useSafeAreaInsets();
   const { completedPrayers, completePrayer } = useProgress();
   const completed = prayer ? Boolean(completedPrayers[prayer.id]) : false;
+  const [submitting, setSubmitting] = useState(false);
 
   const handleComplete = () => {
-    if (!prayer) return;
+    if (!prayer || submitting) return;
+    setSubmitting(true);
     completePrayer(prayer.id);
     onClose();
   };
 
   return (
-    <Modal visible={Boolean(prayer)} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={Boolean(prayer)} transparent animationType="fade" presentationStyle="overFullScreen" onRequestClose={onClose}>
       <View style={styles.modalRoot}>
-        <View style={styles.backdrop} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Fechar oração" style={styles.backdrop} onPress={onClose} />
         <View style={[styles.dialogWrap, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
           {prayer ? (
-            <View style={styles.dialog}>
-              <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} style={styles.closeButton}>
+            <View accessibilityViewIsModal style={styles.dialog}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Fechar oração" hitSlop={8} onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeText}>×</Text>
               </Pressable>
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -51,9 +54,10 @@ export function PrayerModal({ prayer, onClose }: PrayerModalProps) {
                 <Text style={styles.prayerText}>{prayer.text}</Text>
                 <Text style={styles.reference}>{prayer.verseReference}</Text>
                 <PixelButton
-                  label={completed ? 'Orar novamente' : 'Concluir oração'}
+                  label={submitting ? 'Salvando...' : completed ? 'Orar novamente' : 'Concluir oração'}
+                  disabled={submitting}
                   onPress={handleComplete}
-                  icon={<PixelCandle size={28} />}
+                  icon={<PixelPrayer size={28} />}
                   style={styles.action}
                 />
               </ScrollView>
@@ -116,7 +120,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     padding: 26,
-    paddingTop: 34,
+    paddingTop: 56,
     gap: 10,
   },
   artHalo: {

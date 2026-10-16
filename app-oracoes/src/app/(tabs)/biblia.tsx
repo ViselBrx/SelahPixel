@@ -65,8 +65,10 @@ export default function BibleScreen() {
   return (
     <Page>
       <View style={styles.headerRow}>
-        <ScreenTitle title="Biblioteca" subtitle="Encontre e adicione palavras para sua caminhada." />
-        <View style={styles.headerArt}><PixelBible size={74} /></View>
+        <View style={styles.headerCopy}>
+          <ScreenTitle title="Biblioteca" subtitle="Encontre e adicione palavras para sua caminhada." />
+        </View>
+        <View style={styles.headerArt}><PixelBible size={82} /></View>
       </View>
 
       <PixelButton label="Adicionar versículo" icon={<Text style={styles.plus}>+</Text>} onPress={() => openForm(null)} />
@@ -82,13 +84,13 @@ export default function BibleScreen() {
           returnKeyType="search"
           style={styles.searchInput}
         />
-        {query ? <Pressable accessibilityLabel="Limpar busca" onPress={() => setQuery('')} style={styles.clearButton}><Text style={styles.clearText}>×</Text></Pressable> : null}
+        {query ? <Pressable accessibilityRole="button" accessibilityLabel="Limpar busca" onPress={() => setQuery('')} style={styles.clearButton}><Text style={styles.clearText}>×</Text></Pressable> : null}
       </View>
 
       <View style={styles.filterPanel}>
         <View style={styles.filterHeader}>
           <Text style={styles.filterTitle}>FILTROS</Text>
-          {hasFilters ? <Pressable onPress={clearFilters}><Text style={styles.resetText}>LIMPAR TUDO</Text></Pressable> : null}
+          {hasFilters ? <Pressable accessibilityRole="button" accessibilityLabel="Limpar todos os filtros" hitSlop={8} onPress={clearFilters}><Text style={styles.resetText}>LIMPAR TUDO</Text></Pressable> : null}
         </View>
         <Text style={styles.filterLabel}>TEMA</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
@@ -130,8 +132,8 @@ export default function BibleScreen() {
                   <VerseCard verse={verse} mark={marks[verse.id]} onPress={() => setSelectedVerse(verse)} />
                   {custom ? (
                     <View style={styles.manageRow}>
-                      <Pressable onPress={() => openForm(verse)} style={styles.manageButton}><Text style={styles.editText}>EDITAR TEXTO</Text></Pressable>
-                      <Pressable onPress={() => setDeleteTarget(verse)} style={[styles.manageButton, styles.manageDelete]}><Text style={styles.deleteText}>EXCLUIR VERSÍCULO</Text></Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={`Editar ${verse.reference}`} onPress={() => openForm(verse)} style={styles.manageButton}><Text style={styles.editText}>EDITAR TEXTO</Text></Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={`Excluir ${verse.reference}`} onPress={() => setDeleteTarget(verse)} style={[styles.manageButton, styles.manageDelete]}><Text style={styles.deleteText}>EXCLUIR VERSÍCULO</Text></Pressable>
                     </View>
                   ) : null}
                 </View>
@@ -173,8 +175,9 @@ function FilterChip({ label, active, onPress, grow = false }: { label: string; a
 }
 
 const styles = StyleSheet.create({
-  headerRow: { minHeight: 96, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  headerArt: { width: 78, height: 82, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  headerRow: { minHeight: 104, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14 },
+  headerCopy: { flex: 1, minWidth: 0 },
+  headerArt: { width: 92, height: 98, flexShrink: 0, alignItems: 'center', justifyContent: 'center' },
   plus: { color: colors.night, fontFamily: fonts.pixel, fontSize: 20, lineHeight: 21 },
   searchBox: { minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.panel, borderWidth: 2, borderColor: colors.line, borderBottomWidth: 5, borderBottomColor: colors.black, paddingHorizontal: 14, ...pixelShadow },
   searchInput: { flex: 1, color: colors.parchmentLight, fontFamily: fonts.body, fontSize: 14, paddingVertical: 10 },

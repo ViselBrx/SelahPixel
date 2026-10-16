@@ -31,9 +31,11 @@ export default function SavedScreen() {
   return (
     <Page>
       <View style={styles.headerRow}>
-        <ScreenTitle title="Minhas marcações" subtitle="Cadastre, atualize e exclua seus versículos e reflexões." />
+        <View style={styles.headerCopy}>
+          <ScreenTitle title="Minhas marcações" subtitle="Cadastre, atualize e exclua seus versículos e reflexões." />
+        </View>
         <View style={styles.bookmarkTile}>
-          <PixelBookmark size={38} color={colors.gold} filled />
+          <PixelBookmark size={42} color={colors.gold} filled />
         </View>
       </View>
 
@@ -72,11 +74,11 @@ export default function SavedScreen() {
                 style={[styles.allFilter, colorFilter === null && styles.allFilterActive]}>
                 <Text style={[styles.allFilterText, colorFilter === null && styles.allFilterTextActive]}>TODOS</Text>
               </Pressable>
-              {markColors.map((color) => (
+              {markColors.map((color, index) => (
                 <Pressable
                   key={color}
                   accessibilityRole="button"
-                  accessibilityLabel={`Filtrar pela cor ${color}`}
+                  accessibilityLabel={`Filtrar pelo marcador ${['dourado', 'verde', 'azul', 'vermelho', 'violeta'][index]}`}
                   accessibilityState={{ selected: colorFilter === color }}
                   onPress={() => setColorFilter(colorFilter === color ? null : color)}
                   style={[
@@ -150,14 +152,20 @@ export default function SavedScreen() {
 
 const styles = StyleSheet.create({
   headerRow: {
+    minHeight: 104,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
   },
+  headerCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
   bookmarkTile: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
+    flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.panel,

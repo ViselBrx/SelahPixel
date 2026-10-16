@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ConfirmModal } from '@/components/confirm-modal';
-import { PixelCandle, PixelHeart, PixelNavIcon, PixelScroll, PixelShield, PixelSparkles } from '@/components/pixel-art';
+import { PixelCandle, PixelHeart, PixelNavIcon, PixelPrayer, PixelScroll, PixelShield, PixelSparkles } from '@/components/pixel-art';
 import { PrayerFormModal } from '@/components/prayer-form-modal';
 import { PrayerModal } from '@/components/prayer-modal';
 import { Eyebrow, Page, PixelBadge, PixelButton, ScreenTitle, SectionTitle } from '@/components/ui';
@@ -75,7 +75,7 @@ export default function PrayersScreen() {
 
       <View style={styles.hero}>
         <View style={styles.sparkles}><PixelSparkles size={72} color={colors.gold} /></View>
-        <PixelCandle size={88} />
+        <PixelPrayer size={88} />
         <View style={styles.heroCopy}>
           <Eyebrow>Acenda sua chama</Eyebrow>
           <Text style={styles.heroTitle}>{streak} {streak === 1 ? 'dia' : 'dias'} de jornada</Text>
@@ -92,13 +92,13 @@ export default function PrayersScreen() {
       <View style={styles.searchBox}>
         <PixelNavIcon name="search" size={21} color={colors.gold} />
         <TextInput value={query} onChangeText={setQuery} placeholder="Buscar oração, foco ou referência..." placeholderTextColor={colors.textMuted} style={styles.searchInput} />
-        {query ? <Pressable onPress={() => setQuery('')} style={styles.clearButton}><Text style={styles.clearText}>×</Text></Pressable> : null}
+        {query ? <Pressable accessibilityRole="button" accessibilityLabel="Limpar busca" onPress={() => setQuery('')} style={styles.clearButton}><Text style={styles.clearText}>×</Text></Pressable> : null}
       </View>
 
       <View style={styles.filterPanel}>
         <View style={styles.filterHeader}>
           <Text style={styles.filterTitle}>QUANDO VOCÊ QUER ORAR?</Text>
-          <Pressable onPress={clearFilters}><Text style={styles.resetText}>REDEFINIR</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Redefinir filtros" hitSlop={8} onPress={clearFilters}><Text style={styles.resetText}>REDEFINIR</Text></Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
           {([
@@ -152,8 +152,8 @@ export default function PrayersScreen() {
                   </Pressable>
                   {custom ? (
                     <View style={styles.manageRow}>
-                      <Pressable onPress={() => openForm(prayer)} style={styles.manageButton}><Text style={styles.editText}>EDITAR ORAÇÃO</Text></Pressable>
-                      <Pressable onPress={() => setDeleteTarget(prayer)} style={[styles.manageButton, styles.manageDelete]}><Text style={styles.deleteText}>EXCLUIR</Text></Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={`Editar oração ${prayer.title}`} onPress={() => openForm(prayer)} style={styles.manageButton}><Text style={styles.editText}>EDITAR ORAÇÃO</Text></Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={`Excluir oração ${prayer.title}`} onPress={() => setDeleteTarget(prayer)} style={[styles.manageButton, styles.manageDelete]}><Text style={styles.deleteText}>EXCLUIR</Text></Pressable>
                     </View>
                   ) : null}
                 </View>
@@ -197,7 +197,7 @@ function Summary({ value, label }: { value: number; label: string }) {
 }
 
 function FilterChip({ label, active, onPress, grow = false }: { label: string; active: boolean; onPress: () => void; grow?: boolean }) {
-  return <Pressable onPress={onPress} style={[styles.filter, grow && styles.filterGrow, active && styles.filterActive]}><Text style={[styles.filterText, active && styles.filterTextActive]}>{label}</Text></Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: active }} onPress={onPress} style={[styles.filter, grow && styles.filterGrow, active && styles.filterActive]}><Text style={[styles.filterText, active && styles.filterTextActive]}>{label}</Text></Pressable>;
 }
 
 const styles = StyleSheet.create({

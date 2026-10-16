@@ -48,7 +48,9 @@ export const layout = {
   pagePadding: 20,
   radius: 4,
   maxWidth: 620,
-  tabBarSpace: 94,
+  tabBarContentHeight: 64,
+  tabBarMinBottom: 8,
+  tabBarContentGap: 24,
 };
 
 export const pixelShadow = {

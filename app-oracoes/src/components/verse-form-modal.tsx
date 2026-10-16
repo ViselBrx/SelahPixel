@@ -23,12 +23,15 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
   const [theme, setTheme] = useState<VerseTheme>(() => verse?.theme ?? 'Promessas');
   const [testament, setTestament] = useState<'Antigo' | 'Novo'>(() => verse?.testament ?? 'Novo');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSave = () => {
+    if (submitting) return;
     if (!reference.trim() || !text.trim()) {
       setError('Informe a referência e o texto do versículo.');
       return;
     }
+    setSubmitting(true);
     const draft = {
       reference: reference.trim(),
       book: book.trim() || reference.trim().split(/\s+/)[0],
@@ -42,10 +45,15 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <Modal visible={visible} transparent animationType="slide" presentationStyle="overFullScreen" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={[
+          styles.root,
+          { paddingTop: Math.max(insets.top, 10), paddingBottom: Math.max(insets.bottom, 10) },
+        ]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Pressable accessibilityLabel="Fechar formulário" style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View accessibilityViewIsModal style={styles.sheet}>
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
             <View style={styles.header}>
               <PixelBible size={56} />
@@ -53,7 +61,7 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
                 <Text style={styles.eyebrow}>{verse ? 'ATUALIZAR CONTEÚDO' : 'NOVO CONTEÚDO'}</Text>
                 <Text style={styles.title}>{verse ? 'Editar versículo' : 'Adicionar versículo'}</Text>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} style={styles.close}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Fechar formulário de versículo" hitSlop={8} onPress={onClose} style={styles.close}>
                 <Text style={styles.closeText}>×</Text>
               </Pressable>
             </View>
@@ -81,7 +89,11 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
             </View>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <PixelButton label={verse ? 'Salvar alterações' : 'Adicionar versículo'} onPress={handleSave} />
+            <PixelButton
+              label={submitting ? 'Salvando...' : verse ? 'Salvar alterações' : 'Adicionar versículo'}
+              disabled={submitting}
+              onPress={handleSave}
+            />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -95,6 +107,7 @@ function Field({ label, multiline, ...props }: { label: string; multiline?: bool
       <Text style={styles.label}>{label}</Text>
       <TextInput
         {...props}
+        accessibilityLabel={label.replace(' *', '')}
         multiline={multiline}
         placeholderTextColor="#8D806A"
         textAlignVertical={multiline ? 'top' : 'center'}
@@ -106,17 +119,22 @@ function Field({ label, multiline, ...props }: { label: string; multiline?: bool
 
 function Option({ label, active, onPress, grow = false }: { label: string; active: boolean; onPress: () => void; grow?: boolean }) {
   return (
-    <Pressable onPress={onPress} style={[styles.option, grow && styles.optionGrow, active && styles.optionActive]}>
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: active }}
+      onPress={onPress}
+      style={[styles.option, grow && styles.optionGrow, active && styles.optionActive]}>
       <Text style={[styles.optionText, active && styles.optionTextActive]}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end' },
+  root: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: 10 },
   backdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(4,5,9,0.82)' },
-  sheet: { width: '100%', maxHeight: '92%', alignSelf: 'center', maxWidth: 620, backgroundColor: colors.parchment, borderWidth: 3, borderColor: colors.parchmentLight, borderBottomColor: colors.goldDark, ...pixelShadow },
-  content: { padding: 20, gap: 17 },
+  sheet: { width: '100%', maxHeight: '100%', alignSelf: 'center', maxWidth: 620, backgroundColor: colors.parchment, borderWidth: 3, borderColor: colors.parchmentLight, borderBottomColor: colors.goldDark, ...pixelShadow },
+  content: { padding: 20, paddingBottom: 24, gap: 17 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerCopy: { flex: 1 },
   eyebrow: { color: colors.goldDark, fontFamily: fonts.pixel, fontSize: 9, letterSpacing: 0.8 },

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MarkModal } from '@/components/mark-modal';
-import { PixelBible, PixelBookmark, PixelFlame, PixelNavIcon } from '@/components/pixel-art';
+import { PixelBible, PixelBookmark, PixelFlame, PixelNavIcon, PixelPrayer } from '@/components/pixel-art';
 import { StreakModal } from '@/components/streak-modal';
 import { BrandMark, Page, PixelBadge, PixelButton, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/context/progress-context';
@@ -95,17 +95,23 @@ export default function HomeScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statIcon}>🔥</Text>
+          <View style={[styles.statArt, styles.statArtFlame]}>
+            <PixelFlame size={25} />
+          </View>
           <Text style={styles.statValue}>{streak}</Text>
           <Text style={styles.statLabel}>DIAS</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statIcon}>🙏</Text>
+          <View style={[styles.statArt, styles.statArtPrayer]}>
+            <PixelPrayer size={23} />
+          </View>
           <Text style={styles.statValue}>{completedPrayerCount}</Text>
           <Text style={styles.statLabel}>ORAÇÕES</Text>
         </View>
         <View style={styles.statCard}>
-          <PixelBookmark size={20} color={colors.gold} filled />
+          <View style={[styles.statArt, styles.statArtBookmark]}>
+            <PixelBookmark size={20} color={colors.goldBright} filled />
+          </View>
           <Text style={styles.statValue}>{markedCount}</Text>
           <Text style={styles.statLabel}>MARCAS</Text>
         </View>
@@ -285,9 +291,26 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.black,
     gap: 2,
   },
-  statIcon: {
-    fontSize: 17,
-    lineHeight: 20,
+  statArt: {
+    width: 30,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderBottomWidth: 4,
+    backgroundColor: colors.night,
+  },
+  statArtFlame: {
+    borderColor: colors.ruby,
+    borderBottomColor: colors.rubyDark,
+  },
+  statArtPrayer: {
+    borderColor: colors.violet,
+    borderBottomColor: '#55466D',
+  },
+  statArtBookmark: {
+    borderColor: colors.gold,
+    borderBottomColor: colors.goldDark,
   },
   statValue: {
     color: colors.parchmentLight,

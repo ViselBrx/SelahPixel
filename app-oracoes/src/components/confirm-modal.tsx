@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PixelButton } from '@/components/ui';
 import { colors, fonts, pixelShadow } from '@/theme';
@@ -20,18 +22,30 @@ export function ConfirmModal({
   onCancel,
   onConfirm,
 }: ConfirmModalProps) {
+  const insets = useSafeAreaInsets();
+  const confirmingRef = useRef(false);
+
+  const handleConfirm = () => {
+    if (confirmingRef.current) return;
+    confirmingRef.current = true;
+    onConfirm();
+    setTimeout(() => {
+      confirmingRef.current = false;
+    }, 500);
+  };
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.root}>
-        <Pressable accessibilityLabel="Cancelar" style={styles.backdrop} onPress={onCancel} />
-        <View style={styles.dialog}>
+    <Modal visible={visible} transparent animationType="fade" presentationStyle="overFullScreen" onRequestClose={onCancel}>
+      <View style={[styles.root, { paddingTop: Math.max(insets.top, 20), paddingBottom: Math.max(insets.bottom, 20) }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Cancelar e fechar aviso" style={styles.backdrop} onPress={onCancel} />
+        <View accessibilityViewIsModal style={styles.dialog}>
           <Text style={styles.rune}>!</Text>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <Text style={styles.warning}>Esta ação não pode ser desfeita.</Text>
           <View style={styles.actions}>
             <PixelButton label="Cancelar" tone="dark" compact onPress={onCancel} style={styles.action} />
-            <PixelButton label={confirmLabel} tone="ruby" compact onPress={onConfirm} style={styles.action} />
+            <PixelButton label={confirmLabel} tone="ruby" compact onPress={handleConfirm} style={styles.action} />
           </View>
         </View>
       </View>
@@ -57,6 +71,7 @@ const styles = StyleSheet.create({
   dialog: {
     width: '100%',
     maxWidth: 430,
+    maxHeight: '100%',
     alignItems: 'center',
     gap: 13,
     backgroundColor: colors.parchment,

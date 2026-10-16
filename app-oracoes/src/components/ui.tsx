@@ -10,9 +10,9 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PixelSparkles } from '@/components/pixel-art';
+import { PixelBrandMark, PixelSparkles } from '@/components/pixel-art';
 import { colors, fonts, layout, pixelShadow } from '@/theme';
 
 type PageProps = PropsWithChildren<{
@@ -22,7 +22,14 @@ type PageProps = PropsWithChildren<{
 }>;
 
 export function Page({ children, scroll = true, contentStyle, scrollProps }: PageProps) {
-  const content = <View style={[styles.pageContent, contentStyle]}>{children}</View>;
+  const insets = useSafeAreaInsets();
+  const tabBarClearance =
+    layout.tabBarContentHeight +
+    Math.max(insets.bottom, layout.tabBarMinBottom) +
+    layout.tabBarContentGap;
+  const content = (
+    <View style={[styles.pageContent, { paddingBottom: tabBarClearance }, contentStyle]}>{children}</View>
+  );
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -47,11 +54,11 @@ export function BrandMark() {
   return (
     <View style={styles.brandRow}>
       <View style={styles.brandRune}>
-        <Text style={styles.brandCross}>✦</Text>
+        <PixelBrandMark size={32} />
       </View>
       <View>
-        <Text style={styles.brandName}>ORÁ</Text>
-        <Text style={styles.brandTagline}>JORNADA BÍBLICA</Text>
+        <Text style={styles.brandName}>SELAHPIXEL</Text>
+        <Text style={styles.brandTagline}>GUARDE A PALAVRA. ENCONTRE SUA PAZ.</Text>
       </View>
     </View>
   );
@@ -192,7 +199,6 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxWidth,
     paddingHorizontal: layout.pagePadding,
     paddingTop: 12,
-    paddingBottom: layout.tabBarSpace,
     gap: 24,
   },
   brandRow: {
@@ -211,23 +217,20 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.goldDark,
     borderRightColor: colors.goldDark,
   },
-  brandCross: {
-    color: colors.night,
-    fontSize: 20,
-    lineHeight: 22,
-  },
   brandName: {
     color: colors.parchmentLight,
     fontFamily: fonts.display,
-    fontSize: 20,
-    letterSpacing: 2,
+    fontSize: 17,
+    letterSpacing: 1.2,
     lineHeight: 21,
   },
   brandTagline: {
     color: colors.gold,
     fontFamily: fonts.pixel,
-    fontSize: 9,
-    letterSpacing: 1.2,
+    maxWidth: 174,
+    fontSize: 7,
+    lineHeight: 10,
+    letterSpacing: 0.35,
   },
   eyebrow: {
     color: colors.gold,
@@ -324,6 +327,9 @@ const styles = StyleSheet.create({
     color: colors.night,
     fontFamily: fonts.pixel,
     fontSize: 12,
+    flexShrink: 1,
+    textAlign: 'center',
+    lineHeight: 16,
     letterSpacing: 0.7,
     textTransform: 'uppercase',
   },
