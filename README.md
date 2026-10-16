@@ -36,32 +36,114 @@ O aplicativo começa vazio e ganha forma com a caminhada de cada pessoa. Não ex
   </tr>
 </table>
 
-## O que você pode fazer
+## Download para Android
 
-- adicionar, editar e excluir seus próprios versículos;
-- pesquisar por livro, referência, tema ou trecho do texto;
-- filtrar versículos por tema, testamento e origem;
-- marcar passagens com cores e anotações pessoais;
-- adicionar, editar, concluir e excluir orações;
-- organizar orações por período e status;
-- acompanhar uma sequência diária representada por uma chama;
-- receber uma saudação de manhã, tarde ou noite conforme o horário local;
-- visualizar uma palavra do dia escolhida entre seus versículos;
-- usar o aplicativo mesmo sem conexão com a internet.
+[**⬇ Baixar o SelahPixel para Android (.apk)**](app-oracoes/assets/apk/selahpixel-android.apk)
 
-## Uma jornada pessoal
+## Recursos
 
-1. Cadastre versículos importantes para sua caminhada.
-2. Faça marcações e registre o que cada passagem despertou em você.
-3. Escreva suas orações e acompanhe as que foram concluídas.
-4. Volte diariamente para manter sua chama acesa.
+- página inicial adaptada ao período local: manhã, tarde ou noite;
+- palavra do dia escolhida entre os versículos adicionados pelo usuário;
+- cadastro, edição e exclusão de versículos pessoais;
+- busca por livro, referência, tema ou trecho do texto;
+- filtros por tema, testamento e origem;
+- marcações com cores e anotações pessoais;
+- cadastro, edição e exclusão de orações;
+- filtros de oração por período, status e termo de busca;
+- sequência diária com chama e calendário semanal;
+- confirmação obrigatória antes de qualquer exclusão;
+- avisos visuais após cadastrar, atualizar, concluir ou excluir algo;
+- funcionamento offline com persistência local;
+- interface responsiva com arte pixelada original;
+- página de créditos, agradecimento e contato com o criador.
 
-Todas as exclusões solicitam confirmação antes de remover o conteúdo, evitando perdas por toques acidentais.
+> [!IMPORTANT]
+> Os dados são armazenados somente neste aparelho com AsyncStorage. Desinstalar o aplicativo ou limpar seus dados pode remover versículos, orações, marcações e o histórico da sequência.
 
-## Apk 
+## Tecnologias
 
-Versão Android. Para instalar, baixe o arquivo [APK](app-oracoes/assets/apk/selahpixel-android.apk) e instale no seu dispositivo.
+| Tecnologia | Uso no projeto |
+| --- | --- |
+| Expo SDK 57 | Ferramentas de desenvolvimento e compilação |
+| React Native 0.86 | Interface nativa para Android e iOS |
+| Expo Router | Navegação baseada nos arquivos de `src/app` |
+| TypeScript | Tipagem e segurança do código |
+| AsyncStorage | Persistência local dos dados pessoais |
+| React Native SVG | Ilustrações e ícones pixelados |
 
+## Estrutura principal
+
+```text
+app-oracoes/
+├── assets/
+│   ├── apk/                 # Versão Android disponível para download
+│   ├── images/              # Ícone, splash e imagens do aplicativo
+│   └── svg/                 # Marca e ilustrações em pixel art
+├── src/
+│   ├── app/                 # Telas e rotas do Expo Router
+│   │   └── (tabs)/          # Início, Bíblia, Orações, Marcados e Créditos
+│   ├── components/          # Modais, botões, cards e pixel art
+│   ├── context/             # Estado e persistência da jornada
+│   ├── data/                # Tipos e metadados do conteúdo
+│   ├── theme/               # Cores, fontes e medidas visuais
+│   └── utils/               # Utilitários de data e período do dia
+├── app.json                 # Configuração do aplicativo Expo
+├── eas.json                 # Perfis de compilação APK e produção
+└── package.json             # Dependências e comandos
+```
+
+## Pré-requisitos
+
+- [Node.js](https://nodejs.org/) em uma versão LTS atual;
+- npm, instalado junto com o Node.js;
+- [Expo Go](https://expo.dev/go) no celular para testes rápidos, ou um emulador Android;
+- uma conta gratuita da Expo para gerar o APK na nuvem.
+
+## Instalação
+
+Abra o terminal dentro da pasta do projeto:
+
+```powershell
+cd C:\Users\enzot\Desktop\App-Ora-es\app-oracoes
+npm install
+```
+
+Inicie o servidor de desenvolvimento:
+
+```powershell
+npm start
+```
+
+Escaneie o QR Code com o Expo Go. Também é possível usar os atalhos exibidos pelo Expo ou executar diretamente:
+
+```powershell
+# Android ou emulador
+npm run android
+
+# Navegador
+npm run web
+```
+
+Se o cache do Expo causar algum comportamento estranho, reinicie-o com:
+
+```powershell
+npx expo start --clear
+```
+
+## Verificações do projeto
+
+Antes de gerar uma versão instalável, execute:
+
+```powershell
+# Verifica os tipos TypeScript
+npm run typecheck
+
+# Verifica a qualidade e o padrão do código
+npm run lint
+
+# Confere dependências e configuração do Expo
+npx expo-doctor
+```
 
 ## Dados e privacidade
 
