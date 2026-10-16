@@ -104,7 +104,7 @@ app-oracoes/
 Abra o terminal dentro da pasta do projeto:
 
 ```powershell
-cd C:\Users\enzot\Desktop\App-Ora-es\app-oracoes
+cd app-oracoes
 npm install
 ```
 
