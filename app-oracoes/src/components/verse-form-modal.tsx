@@ -4,9 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PixelBible } from '@/components/pixel-art';
 import { PixelButton } from '@/components/ui';
-import { useProgress } from '@/context/progress-context';
+import { useProgress, VerseDraft } from '@/context/progress-context';
 import { themes, Verse, VerseTheme } from '@/data/content';
 import { colors, fonts, pixelShadow } from '@/theme';
+import { cancelReminder, scheduleVerseReminder } from '@/utils/reminders';
 
 type VerseFormModalProps = {
   visible: boolean;
@@ -22,23 +23,49 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
   const [text, setText] = useState(() => verse?.text ?? '');
   const [theme, setTheme] = useState<VerseTheme>(() => verse?.theme ?? 'Promessas');
   const [testament, setTestament] = useState<'Antigo' | 'Novo'>(() => verse?.testament ?? 'Novo');
+  const [reminderEnabled, setReminderEnabled] = useState(() => Boolean(verse?.reminderTime));
+  const [reminderTime, setReminderTime] = useState(() => verse?.reminderTime ?? '07:00');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (submitting) return;
     if (!reference.trim() || !text.trim()) {
       setError('Informe a referência e o texto do versículo.');
       return;
     }
     setSubmitting(true);
-    const draft = {
+    const draft: VerseDraft = {
       reference: reference.trim(),
       book: book.trim() || reference.trim().split(/\s+/)[0],
       text: text.trim(),
       theme,
       testament,
+      reminderTime: null,
+      notificationId: null,
     };
+    try {
+      if (reminderEnabled) {
+        const reminder = await scheduleVerseReminder(
+          { id: verse?.id ?? 'new-verse', reference: draft.reference, text: draft.text },
+          reminderTime,
+        );
+        if (!reminder.id) {
+          setError(reminder.error ?? 'Não foi possível criar o lembrete.');
+          setSubmitting(false);
+          return;
+        }
+        cancelReminder(verse?.notificationId);
+        draft.reminderTime = reminderTime.trim();
+        draft.notificationId = reminder.id;
+      } else {
+        cancelReminder(verse?.notificationId);
+      }
+    } catch {
+      setError('Não foi possível criar o lembrete. Tente novamente.');
+      setSubmitting(false);
+      return;
+    }
     if (verse) updateVerse(verse.id, draft);
     else addVerse(draft);
     onClose();
@@ -86,6 +113,19 @@ export function VerseFormModal({ visible, verse, onClose }: VerseFormModalProps)
                   <Option key={item} label={item} active={testament === item} onPress={() => setTestament(item)} grow />
                 ))}
               </View>
+            </View>
+
+            <View style={styles.reminderCard}>
+              <View style={styles.reminderHeader}>
+                <View style={styles.reminderCopy}>
+                  <Text style={styles.reminderTitle}>LEMBRETE DIÁRIO</Text>
+                  <Text style={styles.reminderText}>Leia este versículo no horário que escolher.</Text>
+                </View>
+                <Pressable accessibilityRole="switch" accessibilityLabel="Ativar lembrete diário" accessibilityState={{ checked: reminderEnabled }} onPress={() => setReminderEnabled((value) => !value)} style={[styles.switch, reminderEnabled && styles.switchActive]}>
+                  <View style={[styles.switchDot, reminderEnabled && styles.switchDotActive]} />
+                </Pressable>
+              </View>
+              {reminderEnabled ? <Field label="HORÁRIO (HH:MM)" value={reminderTime} onChangeText={setReminderTime} placeholder="Ex.: 07:30" /> : null}
             </View>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -152,5 +192,14 @@ const styles = StyleSheet.create({
   optionActive: { backgroundColor: colors.gold, borderColor: colors.goldDark },
   optionText: { color: '#675A46', fontFamily: fonts.pixel, fontSize: 9 },
   optionTextActive: { color: colors.night },
+  reminderCard: { gap: 11, backgroundColor: '#E9DCC0', borderWidth: 2, borderColor: '#B9A47B', padding: 13 },
+  reminderHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  reminderCopy: { flex: 1, gap: 3 },
+  reminderTitle: { color: colors.goldDark, fontFamily: fonts.pixel, fontSize: 10, letterSpacing: 0.7 },
+  reminderText: { color: '#675A46', fontFamily: fonts.body, fontSize: 13, lineHeight: 18 },
+  switch: { width: 46, height: 26, justifyContent: 'center', paddingHorizontal: 3, backgroundColor: '#A99A7C', borderWidth: 2, borderColor: '#675A46' },
+  switchActive: { alignItems: 'flex-end', backgroundColor: colors.gold, borderColor: colors.goldDark },
+  switchDot: { width: 16, height: 16, backgroundColor: colors.parchmentLight, borderWidth: 1, borderColor: '#675A46' },
+  switchDotActive: { borderColor: colors.goldDark },
   error: { color: colors.rubyDark, fontFamily: fonts.body, fontSize: 13 },
 });

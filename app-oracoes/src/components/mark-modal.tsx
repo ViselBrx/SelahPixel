@@ -80,7 +80,7 @@ export function MarkModal({ verse, onClose }: MarkModalProps) {
               </Pressable>
             </View>
 
-            <Text numberOfLines={3} style={styles.preview}>
+            <Text selectable style={styles.preview}>
               “{verse?.text}”
             </Text>
 
@@ -239,14 +239,19 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   preview: {
-    color: '#5B5040',
+    color: colors.ink,
+    backgroundColor: colors.parchmentLight,
     fontFamily: fonts.display,
-    fontSize: 16,
-    fontStyle: 'italic',
-    lineHeight: 23,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.goldDark,
-    paddingLeft: 12,
+    fontSize: 22,
+    lineHeight: 33,
+    borderWidth: 2,
+    borderColor: '#B9A47B',
+    borderLeftWidth: 7,
+    borderLeftColor: colors.gold,
+    borderBottomWidth: 5,
+    borderBottomColor: '#9C8964',
+    padding: 17,
+    ...pixelShadow,
   },
   fieldGroup: {
     gap: 9,

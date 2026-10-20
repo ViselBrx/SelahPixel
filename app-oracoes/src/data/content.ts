@@ -9,6 +9,8 @@ export type Verse = {
   text: string;
   theme: VerseTheme;
   testament: 'Antigo' | 'Novo';
+  reminderTime?: string | null;
+  notificationId?: string | null;
 };
 
 export type Prayer = {
@@ -22,6 +24,8 @@ export type Prayer = {
   color: string;
   icon: 'candle' | 'shield' | 'heart' | 'scroll';
   period: DayPeriod | 'qualquer';
+  reminderTime?: string | null;
+  notificationId?: string | null;
 };
 
 // O app começa sem registros de demonstração. Todo o conteúdo vem do próprio usuário.
@@ -36,4 +40,3 @@ export function getDailyVerse(collection: Verse[], date = new Date()) {
   const day = Math.floor((current - start) / 86_400_000);
   return collection[day % collection.length];
 }
-

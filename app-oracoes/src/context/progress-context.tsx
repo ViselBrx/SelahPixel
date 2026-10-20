@@ -4,6 +4,7 @@ import { AppState } from 'react-native';
 
 import { Prayer, Verse } from '@/data/content';
 import { getLocalDateKey } from '@/utils/date';
+import { cancelReminder } from '@/utils/reminders';
 
 export const markColors = ['#E7B85C', '#70A27A', '#668DB2', '#A94C49', '#8C79A8'] as const;
 
@@ -184,6 +185,8 @@ export function ProgressProvider({ children }: PropsWithChildren) {
       notify('Versículo atualizado com sucesso.');
     },
     deleteVerse: (verseId) => {
+      const verse = progress.customVerses.find((item) => item.id === verseId);
+      cancelReminder(verse?.notificationId);
       setProgress((current) => {
         const marks = { ...current.marks };
         delete marks[verseId];
@@ -212,6 +215,8 @@ export function ProgressProvider({ children }: PropsWithChildren) {
       notify('Oração atualizada com sucesso.');
     },
     deletePrayer: (prayerId) => {
+      const prayer = progress.customPrayers.find((item) => item.id === prayerId);
+      cancelReminder(prayer?.notificationId);
       setProgress((current) => {
         const completedPrayers = { ...current.completedPrayers };
         delete completedPrayers[prayerId];

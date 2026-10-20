@@ -34,6 +34,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#E7B85C",
+          "defaultChannel": "daily-reminders"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#10131D",

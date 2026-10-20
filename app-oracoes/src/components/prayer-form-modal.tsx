@@ -4,10 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PixelCandle, PixelHeart, PixelPrayer, PixelScroll, PixelShield } from '@/components/pixel-art';
 import { PixelButton } from '@/components/ui';
-import { markColors, useProgress } from '@/context/progress-context';
+import { markColors, PrayerDraft, useProgress } from '@/context/progress-context';
 import { Prayer } from '@/data/content';
 import { colors, fonts, pixelShadow } from '@/theme';
 import { DayPeriod, periodLabels } from '@/utils/date';
+import { cancelReminder, schedulePrayerReminder } from '@/utils/reminders';
 
 type PrayerFormModalProps = { visible: boolean; prayer?: Prayer | null; onClose: () => void };
 type PrayerIcon = Prayer['icon'];
@@ -30,17 +31,19 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
   const [period, setPeriod] = useState<DayPeriod | 'qualquer'>(() => prayer?.period ?? 'qualquer');
   const [color, setColor] = useState(() => prayer?.color ?? markColors[0]);
   const [icon, setIcon] = useState<PrayerIcon>(() => prayer?.icon ?? 'candle');
+  const [reminderEnabled, setReminderEnabled] = useState(() => Boolean(prayer?.reminderTime));
+  const [reminderTime, setReminderTime] = useState(() => prayer?.reminderTime ?? '07:00');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (submitting) return;
     if (!title.trim() || !text.trim()) {
       setError('Informe o título e o texto da oração.');
       return;
     }
     setSubmitting(true);
-    const draft = {
+    const draft: PrayerDraft = {
       title: title.trim(),
       subtitle: subtitle.trim() || 'Oração pessoal',
       duration: duration.trim() || '3 min',
@@ -50,7 +53,31 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
       period,
       color,
       icon,
+      reminderTime: null,
+      notificationId: null,
     };
+    try {
+      if (reminderEnabled) {
+        const reminder = await schedulePrayerReminder(
+          { id: prayer?.id ?? 'new-prayer', title: draft.title, subtitle: draft.subtitle },
+          reminderTime,
+        );
+        if (!reminder.id) {
+          setError(reminder.error ?? 'Não foi possível criar o lembrete.');
+          setSubmitting(false);
+          return;
+        }
+        cancelReminder(prayer?.notificationId);
+        draft.reminderTime = reminderTime.trim();
+        draft.notificationId = reminder.id;
+      } else {
+        cancelReminder(prayer?.notificationId);
+      }
+    } catch {
+      setError('Não foi possível criar o lembrete. Tente novamente.');
+      setSubmitting(false);
+      return;
+    }
     if (prayer) updatePrayer(prayer.id, draft);
     else addPrayer(draft);
     onClose();
@@ -131,6 +158,19 @@ export function PrayerFormModal({ visible, prayer, onClose }: PrayerFormModalPro
               </View>
             </View>
 
+            <View style={styles.reminderCard}>
+              <View style={styles.reminderHeader}>
+                <View style={styles.reminderCopy}>
+                  <Text style={styles.reminderTitle}>LEMBRETE DIÁRIO</Text>
+                  <Text style={styles.reminderText}>Receba um convite gentil para este momento.</Text>
+                </View>
+                <Pressable accessibilityRole="switch" accessibilityLabel="Ativar lembrete diário" accessibilityState={{ checked: reminderEnabled }} onPress={() => setReminderEnabled((value) => !value)} style={[styles.switch, reminderEnabled && styles.switchActive]}>
+                  <View style={[styles.switchDot, reminderEnabled && styles.switchDotActive]} />
+                </Pressable>
+              </View>
+              {reminderEnabled ? <Field label="HORÁRIO (HH:MM)" value={reminderTime} onChangeText={setReminderTime} placeholder="Ex.: 07:30" /> : null}
+            </View>
+
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <PixelButton
               label={submitting ? 'Salvando...' : prayer ? 'Salvar alterações' : 'Adicionar oração'}
@@ -181,6 +221,15 @@ const styles = StyleSheet.create({
   optionActive: { backgroundColor: colors.gold, borderColor: colors.goldDark },
   optionText: { color: '#675A46', fontFamily: fonts.pixel, fontSize: 9 },
   optionTextActive: { color: colors.night },
+  reminderCard: { gap: 11, backgroundColor: '#E9DCC0', borderWidth: 2, borderColor: '#B9A47B', padding: 13 },
+  reminderHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  reminderCopy: { flex: 1, gap: 3 },
+  reminderTitle: { color: colors.goldDark, fontFamily: fonts.pixel, fontSize: 10, letterSpacing: 0.7 },
+  reminderText: { color: '#675A46', fontFamily: fonts.body, fontSize: 13, lineHeight: 18 },
+  switch: { width: 46, height: 26, justifyContent: 'center', paddingHorizontal: 3, backgroundColor: '#A99A7C', borderWidth: 2, borderColor: '#675A46' },
+  switchActive: { alignItems: 'flex-end', backgroundColor: colors.gold, borderColor: colors.goldDark },
+  switchDot: { width: 16, height: 16, backgroundColor: colors.parchmentLight, borderWidth: 1, borderColor: '#675A46' },
+  switchDotActive: { borderColor: colors.goldDark },
   iconRow: { flexDirection: 'row', gap: 9 },
   iconOption: { flex: 1, minHeight: 68, alignItems: 'center', justifyContent: 'center', gap: 2, backgroundColor: '#E1D2B0', borderWidth: 2, borderColor: '#B9A47B' },
   iconOptionActive: { backgroundColor: colors.gold, borderColor: colors.goldDark },
