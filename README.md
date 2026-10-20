@@ -38,7 +38,7 @@ O aplicativo começa vazio e ganha forma com a caminhada de cada pessoa. Não ex
 
 ## Download para Android
 
-[**⬇ Baixar o SelahPixel para Android (.apk)**](app-oracoes/assets/apk/selahpixel-android.apk)
+[**Baixar o SelahPixel para Android (.apk)**](app-oracoes/assets/apk/selahpixel-android.apk)
 
 ## Recursos
 
@@ -104,7 +104,7 @@ app-oracoes/
 Abra o terminal dentro da pasta do projeto:
 
 ```powershell
-cd C:\Users\enzot\Desktop\App-Ora-es\app-oracoes
+cd app-oracoes
 npm install
 ```
 
